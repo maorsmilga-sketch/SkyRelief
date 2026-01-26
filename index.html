@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SkyRelief - Final Mobile Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --airline-dark: #0f172a; --airline-accent: #38bdf8;
+            --hotel-bg: #f8fafc; --hotel-accent: #0d9488;
+            --passenger-accent: #6366f1; --success: #10b981; --danger: #ef4444;
+        }
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; padding: 0; background: #020617; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+
+        /* Mobile-First Layout: Split Screen 50/50 */
+        .dashboard {
+            display: flex; width: 100vw; height: 100vh;
+            flex-direction: row; /* Horizontal split on mobile too */
+        }
+
+        .side { flex: 1; height: 100%; display: flex; flex-direction: column; position: relative; border: 1px solid #1e293b; }
+
+        /* Passenger View */
+        .passenger-side { background: #fff; color: #333; }
+        .phone-content { flex: 1; padding: 15px; display: flex; flex-direction: column; }
+        .screen { display: none; flex-direction: column; height: 100%; }
+        .active { display: flex; }
+
+        /* Admin Sides (Airline Top, Hotel Bottom) */
+        .admin-stack { flex: 1; display: flex; flex-direction: column; }
+        .admin-box { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        
+        .header { padding: 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; text-align: center; color: #fff; background: rgba(0,0,0,0.3); }
+        .airline-box { background: var(--airline-dark); }
+        .hotel-box { background: var(--hotel-bg); color: #1e293b; border-top: 2px solid #334155; }
+
+        .console { font-family: monospace; color: var(--airline-accent); background: #000; padding: 8px; margin: 8px; border-radius: 8px; flex-grow: 1; font-size: 9px; overflow-y: auto; line-height: 1.2; }
+        
+        /* Bidding UI */
+        .market-tag { background: #fee2e2; border: 1px solid var(--danger); padding: 8px; border-radius: 8px; text-align: center; margin: 5px 10px; }
+        .market-tag span { font-size: 18px; font-weight: 800; color: var(--danger); }
+        
+        .btn { padding: 12px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; font-size: 12px; }
+        .btn-p { background: var(--airline-accent); color: var(--airline-dark); width: 100%; }
+        .btn-h { background: var(--hotel-accent); color: white; width: 100%; }
+        input { width: 100%; padding: 10px; border-radius: 8px; border: 2px solid #ddd; font-size: 16px; text-align: center; margin-bottom: 5px; }
+
+        /* Notification */
+        .notif { position: absolute; top: -100px; left: 10px; right: 10px; background: white; padding: 12px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); border-left: 5px solid var(--passenger-accent); transition: 0.5s; z-index: 100; font-size: 12px; }
+        .notif.show { top: 30px; }
+
+        /* ROI Modal */
+        #roi-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
+        .modal-card { background: white; color: #333; padding: 25px; border-radius: 25px; width: 100%; max-width: 320px; text-align: center; }
+
+        .sig-box { border: 2px dashed #ccc; padding: 15px; margin: 10px 0; text-align: center; color: #999; font-style: italic; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        
+        <div class="side passenger-side">
+            <div class="header" style="background:var(--passenger-accent)">Passenger App</div>
+            <div class="phone-content">
+                <div id="sms" class="notif" onclick="openApp()">
+                    <strong>SkyRelief:</strong> Flight Delay LY315. Click to resolve instantly ✈️
+                </div>
+
+                <div id="app-init" class="screen active" style="justify-content:center; align-items:center; text-align:center;">
+                    <div style="font-size:30px;">📱</div>
+                    <p style="font-size:12px;">Monitoring Flight...</p>
+                </div>
+
+                <div id="app-hotel" class="screen">
+                    <h3 style="color:var(--success); margin:0;">Hotel Ready!</h3>
+                    <div style="background:#f1f5f9; padding:15px; border-radius:15px; margin:15px 0; font-size:13px;">
+                        <strong id="win-name">Leonardo Hotel</strong><br>
+                        Room, Transport & Dinner included.
+                    </div>
+                    <button class="btn btn-p" onclick="nextS('app-legal')">Next: Claim $600 Credit</button>
+                </div>
+
+                <div id="app-legal" class="screen">
+                    <h3 style="margin:0;">Final Offer</h3>
+                    <p style="font-size:11px;">Get <strong>$600 Travel Credit</strong> instead of $400 cash. Sign to waive further claims.</p>
+                    <div class="sig-box" id="sig" onclick="this.innerText='John Doe'; this.style.color='blue'; document.getElementById('final-btn').style.display='block';">Tap to Sign Digitally</div>
+                    <button id="final-btn" class="btn btn-p" style="display:none; background:var(--success)" onclick="showROI()">Submit & Finish</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-stack">
+            <div class="admin-box airline-box">
+                <div class="header">Airline Console</div>
+                <div style="padding:10px;">
+                    <button class="btn btn-p" id="start-btn" onclick="startSim()">1. Trigger Delay</button>
+                </div>
+                <div class="console" id="log">> Standby...</div>
+            </div>
+
+            <div class="admin-box hotel-box">
+                <div class="header" style="background:var(--hotel-accent)">Hotel Bidding</div>
+                <div style="padding:10px; display:flex; flex-direction:column; justify-content:center; height:100%;">
+                    <div class="market-tag">
+                        <small>TARGET TO BEAT:</small><br>
+                        <span id="market-val">€--</span>
+                    </div>
+                    <input type="number" id="bid-input" placeholder="Your Bid (€)">
+                    <button class="btn btn-h" onclick="processBid()">2. Submit Bid</button>
+                    <div id="bid-msg" style="font-size:9px; text-align:center; color:var(--danger); margin-top:3px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="roi-modal">
+        <div class="modal-card">
+            <h2 style="margin-top:0;">Profit Summary</h2>
+            <div style="background:#f0fdf4; padding:15px; border-radius:15px; margin:15px 0; text-align:left; font-size:14px;">
+                <p>🏨 Auction Gain: <strong id="hotel-gain">€0</strong></p>
+                <p>⚖️ Legal Shield Gain: <strong>$260.00</strong></p>
+                <p style="font-size:10px; color:#666;">(Cash $440 vs Credit Cost $180)</p>
+                <hr>
+                <h3 style="color:var(--success); margin-bottom:0; text-align:center;">Total ROI: <span id="total-roi">$0</span></h3>
+            </div>
+            <button class="btn btn-p" onclick="location.reload()">New Demo</button>
+        </div>
+    </div>
+
+    <script>
+        let currentLowest = 180;
+        let auctionInterval;
+        let finalBid = 0;
+
+        const log = (m) => { document.getElementById('log').innerHTML += `<br>> ${m}`; document.getElementById('log').scrollTop = 999; };
+
+        function startSim() {
+            document.getElementById('sms').classList.add('show');
+            document.getElementById('start-btn').disabled = true;
+            log("DELAY DETECTED: LY315.");
+        }
+
+        function openApp() {
+            document.getElementById('sms').classList.remove('show');
+            nextS('app-init');
+            log("PASSENGER ACTIVE. STARTING AUCTION.");
+            startMarketBids();
+        }
+
+        function startMarketBids() {
+            document.getElementById('market-val').innerText = `€${currentLowest}`;
+            auctionInterval = setInterval(() => {
+                let drop = Math.floor(Math.random() * 5) + 2;
+                currentLowest -= drop;
+                document.getElementById('market-val').innerText = `€${currentLowest}`;
+                log(`INCOMING BID: Hilton @ €${currentLowest}`);
+            }, 4000);
+        }
+
+        function processBid() {
+            const userBid = parseInt(document.getElementById('bid-input').value);
+            const msg = document.getElementById('bid-msg');
+            if(!userBid) return;
+
+            if (userBid >= currentLowest) {
+                msg.innerText = "BLOCK: Must beat €" + currentLowest;
+                log(`REJECTED: Bid €${userBid} is too high.`);
+            } else {
+                msg.innerText = "SUCCESS: You are the leader!";
+                msg.style.color = "var(--success)";
+                clearInterval(auctionInterval);
+                currentLowest = userBid;
+                finalBid = userBid;
+                document.getElementById('market-val').innerText = `€${userBid}`;
+                log(`ACCEPTED: Leonardo leads @ €${userBid}.`);
+                setTimeout(() => nextS('app-hotel'), 1000);
+            }
+        }
+
+        function showROI() {
+            let hGain = 180 - finalBid;
+            let total = 260 + hGain;
+            document.getElementById('hotel-gain').innerText = `€${hGain}`;
+            document.getElementById('total-roi').innerText = `$${total.toFixed(2)}`;
+            document.getElementById('roi-modal').style.display = 'flex';
+        }
+
+        function nextS(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+    </script>
+</body>
+</html>
