@@ -3,148 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyRelief - Legal Settlement Flow</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>SkyRelief - Premium Flow V3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --airline: #0f172a; --hotel: #0d9488; --passenger: #6366f1; --bg: #f1f5f9; }
+        :root {
+            --airline-bg: #1e293b; --airline-accent: #38bdf8;
+            --hotel-bg: #0f766e; --hotel-accent: #2dd4bf;
+            --pax-bg: #ffffff; --pax-accent: #6366f1;
+            --success: #10b981; --danger: #ef4444;
+            --bg-main: #f8fafc; --text-dark: #0f172a; --text-light: #64748b;
+        }
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { margin: 0; background: var(--bg); display: flex; height: 100vh; padding: 10px; gap: 10px; overflow: hidden; }
-        .panel { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; display: flex; flex-direction: column; }
-        .panel-header { padding: 12px; color: white; font-weight: 800; text-transform: uppercase; font-size: 11px; text-align: center; }
-        
-        .airline-view { flex: 1.4; display: flex; flex-direction: column; gap: 10px; }
-        .hotel-view { flex: 1.2; border: 12px solid #1a1a1a; border-radius: 40px; }
-        .passenger-view { width: 340px; border: 12px solid #000; border-radius: 45px; background: #fff; overflow: hidden; position: relative; }
+        body { margin: 0; background: var(--bg-main); display: flex; height: 100vh; padding: 20px; gap: 20px; overflow: hidden; }
 
-        /* Passenger Screens */
-        .p-screen { padding: 20px; display: none; height: 100%; overflow-y: auto; }
-        .p-screen.active { display: block; }
-        .msg-bubble { background: #f1f5f9; padding: 15px; border-radius: 15px; font-size: 13px; margin-bottom: 15px; border-bottom-left-radius: 2px; }
+        /* --- SHARED COMPONENTS --- */
+        .panel { background: #fff; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); display: flex; flex-direction: column; overflow: hidden; transition: all 0.3s ease; }
+        .panel-header { padding: 16px; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 1.2px; text-align: center; color: white; }
+        .panel-body { padding: 20px; flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
         
-        .btn { padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; width: 100%; margin-top: 10px; transition: 0.2s; }
+        .btn { padding: 14px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; width: 100%; font-size: 13px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn:active { transform: scale(0.98); }
-        
-        /* Signing Document */
-        .legal-doc { background: #fff; border: 1px solid #ddd; padding: 15px; font-size: 10px; color: #666; height: 150px; overflow-y: scroll; margin-bottom: 10px; }
-        .signature-box { border: 2px dashed #cbd5e1; height: 80px; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-style: italic; font-size: 12px; }
+        .btn-primary { background: var(--pax-accent); color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+        .btn-success { background: var(--success); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        .btn-danger { background: var(--danger); color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+        .btn-outline { background: transparent; border: 2px solid var(--text-light); color: var(--text-light); }
 
-        .profit { color: #10b981; font-weight: 800; }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- LEFT: AIRLINE COMMAND --- */
+        .airline-col { flex: 1.5; display: flex; flex-direction: column; gap: 20px; }
+        .cmd-panel { background: var(--airline-bg); color: white; }
+        .roi-card { background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; }
+        .roi-value { font-size: 18px; font-weight: 900; }
+        .roi-total { font-size: 28px; font-weight: 900; color: var(--success); }
+        #air-log { font-family: monospace; font-size: 11px; color: var(--airline-accent); height: 80px; overflow-y: auto; opacity: 0.8; margin-top: 15px; }
+
+        /* --- CENTER: PASSENGER MOBILE --- */
+        .pax-panel { width: 360px; border: 14px solid #1a1a1a; border-radius: 50px; background: #fff; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .pax-header { background: #fff; padding: 20px; text-align: center; border-bottom: 1px solid #f1f5f9; }
+        .pax-logo { font-weight: 900; color: var(--pax-accent); font-size: 18px; }
+        
+        /* Passenger Steps */
+        .msg-card { background: #f8fafc; padding: 20px; border-radius: 16px; margin-bottom: 20px; border-left: 4px solid var(--pax-accent); }
+        .hotel-card { background: linear-gradient(135deg, var(--hotel-bg), var(--hotel-accent)); color: white; padding: 25px; border-radius: 20px; text-align: center; margin: 20px 0; box-shadow: 0 10px 25px rgba(13, 148, 136, 0.3); }
+        .offer-card { background: linear-gradient(135deg, #ffffff, #f0fdf4); border: 2px solid var(--success); padding: 30px 20px; border-radius: 20px; text-align: center; margin: 20px 0; }
+        
+        /* Signature Pad */
+        .sign-pad { background: #f1f5f9; border-radius: 12px; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; cursor: pointer; border: 2px dashed #cbd5e1; transition: 0.3s; }
+        .sign-pad:hover { border-color: var(--pax-accent); background: #eef2ff; }
+        .sign-pad.signed { border: 2px solid var(--success); background: #f0fdf4; color: var(--success); font-family: cursive; font-size: 24px; }
+
+        /* --- RIGHT: HOTEL LOBBY --- */
+        .hotel-col { flex: 1.2; }
+        .hotel-panel { background: #fff; border: 14px solid #262626; border-radius: 40px; height: 100%; }
+        .lobby-screen { padding: 40px 20px; text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center; }
+        .live-price { font-size: 56px; font-weight: 900; color: var(--danger); margin: 20px 0; }
+        .hotel-input { width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 15px; font-size: 14px; text-align: center; }
+
     </style>
 </head>
 <body>
 
-    <div class="airline-view">
-        <div class="panel" style="background: var(--airline); color: white; flex: 1.2;">
-            <div class="panel-header" style="background: rgba(0,0,0,0.2);">Airline Ops</div>
-            <div style="padding: 15px;">
-                <button class="btn" style="background:#ef4444; color:white;" onclick="startSim()">TRIGGER IROPS (LY315)</button>
-                <div id="air-log" style="font-family:monospace; font-size:10px; color:#38bdf8; margin-top:10px; height:60px; overflow:auto;">> Ready...</div>
+    <div class="airline-col">
+        <div class="panel cmd-panel" style="flex: 1;">
+            <div class="panel-header" style="background: rgba(255,255,255,0.1);">Airline Ops Control</div>
+            <div class="panel-body">
+                <h2 style="margin: 0; font-weight: 900;">LY315 / TLV-LHR</h2>
+                <p style="color: var(--airline-accent); margin: 5px 0 20px;">Status: On Time (142 Pax)</p>
+                <button class="btn btn-danger" onclick="triggerIROPS()">⚡ TRIGGER 4H DELAY (IROPS)</button>
+                <div id="air-log">> System monitoring active...</div>
             </div>
         </div>
-        <div class="panel" style="flex: 1.8; padding: 15px;">
-            <div style="font-size: 11px; font-weight: 800;">REAL-TIME ROI DASHBOARD</div>
-            <table style="width:100%; font-size:12px; margin-top:10px;">
-                <tr><td>Potential Cash Claims</td><td align="right" style="color:#ef4444;">-$85,200</td></tr>
-                <tr><td>SkyRelief Settlement (Credit)</td><td align="right" class="profit" id="roi-credit">+$0.00</td></tr>
-                <tr><td>Hotel Bid Savings</td><td align="right" class="profit" id="roi-hotel">+$0.00</td></tr>
-                <tr style="border-top:2px solid var(--airline);"><td style="font-weight:800;">NET CAPITAL RETAINED</td><td align="right" class="profit" style="font-size:18px;" id="roi-total">$0.00</td></tr>
-            </table>
-        </div>
-    </div>
-
-    <div class="panel passenger-view">
-        <div class="panel-header" style="background: var(--passenger);">SkyRelief Assistant</div>
         
-        <div id="step-hotel" class="p-screen active">
-            <div class="msg-bubble"><strong>Message 1/2:</strong> We've secured a room for you at:</div>
-            <div id="p-hotel-card" style="background:var(--hotel); color:white; padding:15px; border-radius:15px; text-align:center;">
-                <small>Confirmed Stay</small>
-                <div id="assigned-hotel" style="font-size:18px; font-weight:800;">Searching...</div>
-                <div style="font-size:10px; margin-top:5px;">Check-in: Tonight | Shuttle: Every 15m</div>
+        <div class="panel" style="flex: 1.5;">
+            <div class="panel-header" style="background: var(--text-dark); color: white;">Financial Impact Dashboard</div>
+            <div class="panel-body" style="background: #f8fafc;">
+                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                    <div class="roi-card" style="flex:1;">
+                        <div style="font-size: 11px; color: var(--text-light);">POTENTIAL EU261 RISK</div>
+                        <div class="roi-value" style="color: var(--danger);">-$85,200</div>
+                    </div>
+                    <div class="roi-card" style="flex:1;">
+                        <div style="font-size: 11px; color: var(--text-light);">HOTEL COST SAVINGS</div>
+                        <div class="roi-value" style="color: var(--success);" id="roi-hotel">$0.00</div>
+                    </div>
+                </div>
+                <div class="roi-card" style="text-align: center; background: white; border-color: var(--success);">
+                    <div style="font-size: 12px; font-weight: 700; color: var(--text-dark);">NET CAPITAL RETAINED (SETTLEMENT)</div>
+                    <div class="roi-total" id="roi-total">$0.00</div>
+                    <div style="font-size: 11px; color: var(--text-light); margin-top: 5px;">Live tracking realized savings</div>
+                </div>
             </div>
-            <button id="next-to-settle" class="btn hidden" style="background:var(--passenger); color:white;" onclick="goToSettlement()">View Compensation Offer ➔</button>
-        </div>
-
-        <div id="step-offer" class="p-screen">
-            <div class="msg-bubble"><strong>Message 2/2:</strong> We value your time. Instead of waiting months for a legal claim, would you like a <strong>$600 Flight Credit</strong> instantly?</div>
-            <div style="background:#f0fdf4; border:1px solid #10b981; padding:15px; border-radius:15px; text-align:center;">
-                <div style="font-size:24px; font-weight:800; color:#10b981;">$600.00</div>
-                <div style="font-size:10px; color:#166534;">Valid for any flight in the next 24 months</div>
-            </div>
-            <button class="btn" style="background:#10b981; color:white;" onclick="goToSigning()">YES - ACCEPT CREDIT</button>
-            <button class="btn" style="background:transparent; color:#64748b; font-size:11px;">No, I prefer to file a manual claim</button>
-        </div>
-
-        <div id="step-sign" class="p-screen">
-            <h4 style="margin:0 0 10px 0;">Legal Agreement</h4>
-            <div class="legal-doc">
-                I, the passenger, hereby accept the travel credit of $600 as full and final settlement for the disruption of flight LY315. By signing, I waive all rights to further financial claims under EC 261/2004 or local regulations...
-            </div>
-            <div class="signature-box">Sign here with your finger</div>
-            <button class="btn" style="background:var(--airline); color:white;" onclick="completeJourney()">SIGN & FINALIZE</button>
-        </div>
-
-        <div id="step-done" class="p-screen" style="text-align:center; padding-top:60px;">
-            <div style="font-size:50px;">✅</div>
-            <h3>All Set!</h3>
-            <p style="font-size:12px; color:#666;">Hotel voucher and $600 credit sent to your email.</p>
         </div>
     </div>
 
-    <div class="panel hotel-view">
-        <div class="panel-header" style="background: var(--hotel);">Lobby Terminal</div>
-        <div id="h-active" style="padding:20px; display:none;">
-            <div style="color:#ef4444; font-size:11px; font-weight:800;">LIVE AUCTION</div>
-            <div id="h-price" style="font-size:40px; font-weight:800;">€220</div>
-            <input type="text" id="h-name" value="Hilton Airport" style="width:100%; padding:10px; margin-top:10px; border-radius:8px; border:1px solid #ddd;">
-            <button class="btn" style="background:var(--hotel); color:white;" onclick="hotelWin()">SUBMIT WINNING BID</button>
+
+    <div class="panel pax-panel">
+        <div class="pax-header">
+            <div class="pax-logo">SkyRelief Assistant</div>
         </div>
-        <div id="h-idle" style="padding:60px 20px; text-align:center; color:#94a3b8;">Waiting...</div>
+        <div class="panel-body" style="padding: 0;">
+            
+            <div id="pax-step1" class="pax-step fade-in hidden" style="padding: 25px;">
+                <div class="msg-card">
+                    <strong>Update 1 of 2:</strong> We apologize for the delay. We have secured immediate accommodation for you.
+                </div>
+                <div class="hotel-card">
+                    <div style="font-size: 32px; margin-bottom: 10px;">🏨</div>
+                    <div style="font-size: 12px; opacity: 0.8; text-transform: uppercase;">Assigned Hotel</div>
+                    <div id="pax-hotel-name" style="font-size: 22px; font-weight: 900; margin: 5px 0;">Searching...</div>
+                    <div style="font-size: 11px; margin-top: 10px;">Premium King Room | Shuttle Included</div>
+                </div>
+                <button id="btn-to-offer" class="btn btn-primary hidden" onclick="nextStep('pax-step2')">Continue to Compensation ➔</button>
+            </div>
+
+            <div id="pax-step2" class="pax-step fade-in hidden" style="padding: 25px;">
+                 <div class="msg-card">
+                    <strong>Update 2 of 2:</strong> Instead of waiting months for a claim, we can offer you an instant settlement.
+                </div>
+                <div class="offer-card">
+                    <div style="font-size: 12px; font-weight: 700; color: var(--text-light); text-transform: uppercase;">Instant Travel Credit</div>
+                    <div style="font-size: 48px; font-weight: 900; color: var(--success); margin: 10px 0;">$600</div>
+                    <div style="font-size: 11px; color: var(--text-light);">Valid for 24 months on any partner flight.</div>
+                </div>
+                <button class="btn btn-success" style="margin-bottom: 10px;" onclick="nextStep('pax-step3')">✅ Accept $600 Credit</button>
+                <button class="btn btn-outline">No thanks, I'll file manually</button>
+            </div>
+
+            <div id="pax-step3" class="pax-step fade-in hidden" style="padding: 25px;">
+                <h3 style="text-align: center;">Finalize Settlement</h3>
+                <p style="font-size: 11px; color: var(--text-light); text-align: center; margin-bottom: 20px;">By signing, you accept the $600 credit as full and final settlement for flight LY315 disruption.</p>
+                
+                <div id="signature-pad" class="sign-pad" onclick="signDocument(this)">
+                    <span style="color: var(--text-light);">Tap to create digital signature</span>
+                </div>
+                
+                <button id="btn-finalize" class="btn btn-primary hidden" onclick="finishJourney()">Complete & Send Vouchers</button>
+            </div>
+
+            <div id="pax-success" class="pax-step fade-in hidden" style="padding: 40px 25px; text-align: center;">
+                <div style="font-size: 64px; margin-bottom: 20px;">🎉</div>
+                <h2 style="color: var(--success);">All Set!</h2>
+                <p style="color: var(--text-light);">Hotel voucher and $600 credit have been sent to your email.</p>
+            </div>
+
+        </div>
     </div>
+
+
+    <div class="hotel-col">
+        <div class="panel hotel-panel">
+            <div class="panel-header" style="background: var(--hotel-bg);">Lobby Terminal</div>
+            <div class="panel-body" style="padding: 0;">
+                
+                <div id="hotel-idle" class="lobby-screen fade-in">
+                    <div style="font-size: 40px; opacity: 0.3;">💤</div>
+                    <h3 style="color: var(--text-light);">Standby Mode</h3>
+                    <p style="font-size: 12px; color: var(--text-light);">Waiting for network requests...</p>
+                </div>
+
+                <div id="hotel-active" class="lobby-screen fade-in hidden" style="background: #fff1f2;">
+                    <div style="background: var(--danger); color: white; padding: 8px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; margin: 0 auto 20px;">🚨 IROPS ALERT: 40 ROOMS NEEDED</div>
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-light);">CURRENT MARKET BID</div>
+                    <div id="live-price" class="live-price">€220</div>
+                    
+                    <input type="text" id="hotel-name-in" class="hotel-input" value="Grand Airport Hotel">
+                    <button class="btn" style="background: var(--hotel-bg); color: white;" onclick="winBid()">⚡ WIN BLOCK NOW</button>
+                </div>
+
+                <div id="hotel-won" class="lobby-screen fade-in hidden" style="background: #f0fdf4;">
+                    <div style="font-size: 50px;">🏆</div>
+                    <h2 style="color: var(--success);">Block Secured!</h2>
+                    <p style="color: var(--text-light);">Guests are being routed to your property.</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 
     <script>
         let log = (m) => document.getElementById('air-log').innerHTML += `<br>> ${m}`;
-        let auction;
+        let auctionInterval;
+        let currentPrice = 220;
 
-        function startSim() {
-            log("IROPS: Flight LY315 Delayed.");
-            document.getElementById('h-idle').style.display = 'none';
-            document.getElementById('h-active').style.display = 'block';
-            auction = setInterval(() => {
-                let p = parseInt(document.getElementById('h-price').innerText.replace('€',''));
-                document.getElementById('h-price').innerText = `€${p - 5}`;
-            }, 2000);
+        // 1. Trigger the Event
+        function triggerIROPS() {
+            log("IROPS EVENT STARTED: LY315 Delayed.");
+            // Show Hotel Interface
+            document.getElementById('hotel-idle').classList.add('hidden');
+            document.getElementById('hotel-active').classList.remove('hidden');
+            // Show Passenger Interface (Step 1)
+            document.getElementById('pax-step1').classList.remove('hidden');
+            
+            // Start Price Drop Sim
+            auctionInterval = setInterval(() => {
+                currentPrice -= 5;
+                document.getElementById('live-price').innerText = `€${currentPrice}`;
+            }, 1500);
         }
 
-        function hotelWin() {
-            clearInterval(auction);
-            const name = document.getElementById('h-name').value;
-            const price = document.getElementById('h-price').innerText;
-            log(`Winner: ${name} @ ${price}`);
-            document.getElementById('assigned-hotel').innerText = name;
-            document.getElementById('next-to-settle').classList.remove('hidden');
-            document.getElementById('roi-hotel').innerText = `+$8,400`; // Savings example
+        // 2. Hotel Wins Bid
+        function winBid() {
+            clearInterval(auctionInterval);
+            const hotelName = document.getElementById('hotel-name-in').value;
+            log(`Hotel Winner: ${hotelName} at €${currentPrice}`);
+            
+            // Update Hotel UI
+            document.getElementById('hotel-active').classList.add('hidden');
+            document.getElementById('hotel-won').classList.remove('hidden');
+
+            // Update Passenger UI
+            document.getElementById('pax-hotel-name').innerText = hotelName;
+            document.getElementById('btn-to-offer').classList.remove('hidden');
+
+            // Update Airline ROI (Partial)
+            document.getElementById('roi-hotel').innerText = "+$8,400"; // Fake savings calc
         }
 
-        function goToSettlement() {
-            document.querySelector('.active').classList.remove('active');
-            document.getElementById('step-offer').classList.add('active');
-            log("Passenger viewing Settlement Offer.");
+        // 3. Passenger Navigation
+        function nextStep(stepId) {
+            document.querySelectorAll('.pax-step').forEach(el => el.classList.add('hidden'));
+            document.getElementById(stepId).classList.remove('hidden');
         }
 
-        function goToSigning() {
-            document.querySelector('.active').classList.remove('active');
-            document.getElementById('step-sign').classList.add('active');
+        // 4. Signing Simulation
+        function signDocument(pad) {
+            pad.classList.add('signed');
+            pad.innerHTML = "Jonatha Doe"; // Simulated signature
+            document.getElementById('btn-finalize').classList.remove('hidden');
         }
 
-        function completeJourney() {
-            document.querySelector('.active').classList.remove('active');
-            document.getElementById('step-done').classList.add('active');
-            log("SETTLEMENT SIGNED. Payout converted to credit.");
-            document.getElementById('roi-credit').innerText = `+$36,920`; // Payout vs Credit ROI
-            document.getElementById('roi-total').innerText = `$45,320`;
+        // 5. Finalize Journey
+        function finishJourney() {
+            nextStep('pax-success');
+            log("SETTLEMENT FINALIZED: Pax signed waiver.");
+            // Final ROI Update
+            document.getElementById('roi-total').innerText = "$45,320";
+             document.getElementById('roi-total').style.transform = "scale(1.1)";
+             setTimeout(() => { document.getElementById('roi-total').style.transform = "scale(1)"; }, 300);
         }
+
     </script>
 </body>
 </html>
