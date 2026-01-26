@@ -3,249 +3,313 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyRelief - Premium Flow V3</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <title>SkyRelief | Enterprise Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --airline-bg: #1e293b; --airline-accent: #38bdf8;
-            --hotel-bg: #0f766e; --hotel-accent: #2dd4bf;
-            --pax-bg: #ffffff; --pax-accent: #6366f1;
+            --primary: #6366f1; --primary-dark: #4338ca;
             --success: #10b981; --danger: #ef4444;
-            --bg-main: #f8fafc; --text-dark: #0f172a; --text-light: #64748b;
+            --surface-dark: #0f172a; --surface-card: #1e293b;
+            --text-main: #f8fafc; --text-muted: #94a3b8;
+            --glass: rgba(255, 255, 255, 0.05);
+            --shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
         }
-        * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { margin: 0; background: var(--bg-main); display: flex; height: 100vh; padding: 20px; gap: 20px; overflow: hidden; }
 
-        /* --- SHARED COMPONENTS --- */
-        .panel { background: #fff; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); display: flex; flex-direction: column; overflow: hidden; transition: all 0.3s ease; }
-        .panel-header { padding: 16px; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 1.2px; text-align: center; color: white; }
-        .panel-body { padding: 20px; flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
         
-        .btn { padding: 14px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; width: 100%; font-size: 13px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn:active { transform: scale(0.98); }
-        .btn-primary { background: var(--pax-accent); color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
-        .btn-success { background: var(--success); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
-        .btn-danger { background: var(--danger); color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
-        .btn-outline { background: transparent; border: 2px solid var(--text-light); color: var(--text-light); }
+        body { 
+            margin: 0; height: 100vh; overflow: hidden;
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+            color: var(--text-main);
+            display: flex; align-items: center; justify-content: center; gap: 40px;
+            padding: 20px;
+        }
 
+        /* --- COLUMN 1: AIRLINE COMMAND (Dark Dashboard) --- */
+        .col-airline { 
+            flex: 1.2; height: 85vh; display: flex; flex-direction: column; gap: 20px; 
+            animation: slideInLeft 0.8s ease;
+        }
+        
+        .card {
+            background: var(--surface-card); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px; padding: 24px; box-shadow: var(--shadow);
+            backdrop-filter: blur(10px); position: relative; overflow: hidden;
+        }
+
+        .badge { 
+            background: rgba(99, 102, 241, 0.2); color: #818cf8; 
+            padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 1px;
+            text-transform: uppercase; display: inline-block; margin-bottom: 10px;
+        }
+
+        .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .metric-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 16px; }
+        .metric-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .metric-val { font-size: 20px; font-weight: 700; margin-top: 5px; }
+        .val-green { color: var(--success); }
+        .val-red { color: var(--danger); }
+
+        .big-roi { 
+            margin-top: auto; text-align: center; padding: 30px; 
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.0));
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-trigger {
+            width: 100%; padding: 16px; background: linear-gradient(90deg, #ef4444, #dc2626);
+            border: none; border-radius: 14px; color: white; font-weight: 600; cursor: pointer;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); transition: transform 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-trigger:hover { transform: scale(1.02); }
+        .btn-trigger:active { transform: scale(0.98); }
+
+        /* --- COLUMN 2: PASSENGER APP (iPhone Frame) --- */
+        .col-pax { width: 340px; height: 700px; flex-shrink: 0; position: relative; z-index: 10; animation: float 6s ease-in-out infinite; }
+        
+        .iphone-frame {
+            width: 100%; height: 100%; background: #fff; border-radius: 50px;
+            border: 12px solid #2d2d2d; position: relative; overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
+        }
+        .notch { 
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%); 
+            width: 120px; height: 30px; background: #2d2d2d; 
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; z-index: 20; 
+        }
+
+        .app-screen { height: 100%; padding: 50px 20px 20px 20px; background: #f2f2f7; display: flex; flex-direction: column; }
+        
+        .chat-bubble {
+            background: white; padding: 16px; border-radius: 18px; border-bottom-left-radius: 4px;
+            font-size: 14px; color: #1c1c1e; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 15px; transform: translateY(20px); opacity: 0; transition: all 0.4s ease;
+        }
+        .chat-bubble.visible { transform: translateY(0); opacity: 1; }
+
+        .offer-ui {
+            background: linear-gradient(135deg, #6366f1, #4f46e5); color: white;
+            padding: 24px; border-radius: 24px; text-align: center; margin-top: 10px;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+            transform: scale(0.9); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .offer-ui.visible { transform: scale(1); opacity: 1; }
+
+        .sign-btn {
+            background: #000; color: white; border: none; padding: 18px; border-radius: 14px;
+            width: 100%; font-weight: 600; font-size: 14px; margin-top: auto; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+
+        /* --- COLUMN 3: HOTEL LOBBY (Glass Card) --- */
+        .col-hotel { flex: 1; height: 500px; animation: slideInRight 0.8s ease; }
+        
+        .hotel-interface {
+            height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; position: relative;
+        }
+        
+        .live-dot { width: 10px; height: 10px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 10px #ef4444; animation: pulse 1.5s infinite; display: inline-block; margin-right: 8px; }
+        
+        .bid-price { font-size: 72px; font-weight: 800; letter-spacing: -2px; margin: 20px 0; color: white; text-shadow: 0 0 30px rgba(255,255,255,0.2); }
+        
+        .hotel-btn {
+            background: white; color: black; border: none; padding: 15px 40px;
+            border-radius: 30px; font-weight: 700; font-size: 16px; cursor: pointer;
+            box-shadow: 0 0 20px rgba(255,255,255,0.3); transition: 0.3s;
+        }
+        .hotel-btn:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(255,255,255,0.5); }
+
+        /* Animations */
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0px); } }
+        @keyframes slideInLeft { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+        
         .hidden { display: none !important; }
-        .fade-in { animation: fadeIn 0.4s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- LEFT: AIRLINE COMMAND --- */
-        .airline-col { flex: 1.5; display: flex; flex-direction: column; gap: 20px; }
-        .cmd-panel { background: var(--airline-bg); color: white; }
-        .roi-card { background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; }
-        .roi-value { font-size: 18px; font-weight: 900; }
-        .roi-total { font-size: 28px; font-weight: 900; color: var(--success); }
-        #air-log { font-family: monospace; font-size: 11px; color: var(--airline-accent); height: 80px; overflow-y: auto; opacity: 0.8; margin-top: 15px; }
-
-        /* --- CENTER: PASSENGER MOBILE --- */
-        .pax-panel { width: 360px; border: 14px solid #1a1a1a; border-radius: 50px; background: #fff; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
-        .pax-header { background: #fff; padding: 20px; text-align: center; border-bottom: 1px solid #f1f5f9; }
-        .pax-logo { font-weight: 900; color: var(--pax-accent); font-size: 18px; }
-        
-        /* Passenger Steps */
-        .msg-card { background: #f8fafc; padding: 20px; border-radius: 16px; margin-bottom: 20px; border-left: 4px solid var(--pax-accent); }
-        .hotel-card { background: linear-gradient(135deg, var(--hotel-bg), var(--hotel-accent)); color: white; padding: 25px; border-radius: 20px; text-align: center; margin: 20px 0; box-shadow: 0 10px 25px rgba(13, 148, 136, 0.3); }
-        .offer-card { background: linear-gradient(135deg, #ffffff, #f0fdf4); border: 2px solid var(--success); padding: 30px 20px; border-radius: 20px; text-align: center; margin: 20px 0; }
-        
-        /* Signature Pad */
-        .sign-pad { background: #f1f5f9; border-radius: 12px; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; cursor: pointer; border: 2px dashed #cbd5e1; transition: 0.3s; }
-        .sign-pad:hover { border-color: var(--pax-accent); background: #eef2ff; }
-        .sign-pad.signed { border: 2px solid var(--success); background: #f0fdf4; color: var(--success); font-family: cursive; font-size: 24px; }
-
-        /* --- RIGHT: HOTEL LOBBY --- */
-        .hotel-col { flex: 1.2; }
-        .hotel-panel { background: #fff; border: 14px solid #262626; border-radius: 40px; height: 100%; }
-        .lobby-screen { padding: 40px 20px; text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center; }
-        .live-price { font-size: 56px; font-weight: 900; color: var(--danger); margin: 20px 0; }
-        .hotel-input { width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 15px; font-size: 14px; text-align: center; }
 
     </style>
 </head>
 <body>
 
-    <div class="airline-col">
-        <div class="panel cmd-panel" style="flex: 1;">
-            <div class="panel-header" style="background: rgba(255,255,255,0.1);">Airline Ops Control</div>
-            <div class="panel-body">
-                <h2 style="margin: 0; font-weight: 900;">LY315 / TLV-LHR</h2>
-                <p style="color: var(--airline-accent); margin: 5px 0 20px;">Status: On Time (142 Pax)</p>
-                <button class="btn btn-danger" onclick="triggerIROPS()">⚡ TRIGGER 4H DELAY (IROPS)</button>
-                <div id="air-log">> System monitoring active...</div>
+    <div class="col-airline">
+        <div class="card" style="flex: 0 0 auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 24px;">✈️</span> SKYRELIEF OPS
+                </div>
+                <div class="badge">LIVE MONITORING</div>
+            </div>
+            
+            <div style="color: var(--text-muted); font-size: 13px; margin-bottom: 5px;">FLIGHT STATUS</div>
+            <div style="font-size: 24px; font-weight: 600;">LY315 <span style="color: var(--text-muted); font-weight: 400;">(TLV → LHR)</span></div>
+            
+            <div style="margin-top: 30px;">
+                <button class="btn-trigger" onclick="runScenario()">
+                    <span>⚠️</span> TRIGGER IROPS PROTOCOL
+                </button>
+            </div>
+        </div>
+
+        <div class="card big-roi">
+            <div class="metric-label" style="margin-bottom: 10px;">TOTAL CAPITAL PROTECTED</div>
+            <div class="metric-val val-green" style="font-size: 48px;" id="total-saved">$0.00</div>
+            <div class="metric-grid">
+                <div class="metric-box">
+                    <div class="metric-label">Potential Cash Loss</div>
+                    <div class="metric-val val-red" id="risk-val">-$85k</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-label">Voucher Conversion</div>
+                    <div class="metric-val val-green" id="conv-val">0%</div>
+                </div>
             </div>
         </div>
         
-        <div class="panel" style="flex: 1.5;">
-            <div class="panel-header" style="background: var(--text-dark); color: white;">Financial Impact Dashboard</div>
-            <div class="panel-body" style="background: #f8fafc;">
-                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                    <div class="roi-card" style="flex:1;">
-                        <div style="font-size: 11px; color: var(--text-light);">POTENTIAL EU261 RISK</div>
-                        <div class="roi-value" style="color: var(--danger);">-$85,200</div>
-                    </div>
-                    <div class="roi-card" style="flex:1;">
-                        <div style="font-size: 11px; color: var(--text-light);">HOTEL COST SAVINGS</div>
-                        <div class="roi-value" style="color: var(--success);" id="roi-hotel">$0.00</div>
-                    </div>
+        <div style="font-family: monospace; color: var(--primary); font-size: 12px; opacity: 0.7;" id="console-log">
+            > System connected. Waiting for event...
+        </div>
+    </div>
+
+    <div class="col-pax">
+        <div class="iphone-frame">
+            <div class="notch"></div>
+            <div class="app-screen">
+                <div style="text-align: center; margin-bottom: 20px; font-weight: 700; color: #1c1c1e;">SkyRelief Assistant</div>
+                
+                <div id="msg-1" class="chat-bubble">
+                    <strong>Flight Update:</strong> We noticed your flight is delayed. Don't worry, we've got you covered.
                 </div>
-                <div class="roi-card" style="text-align: center; background: white; border-color: var(--success);">
-                    <div style="font-size: 12px; font-weight: 700; color: var(--text-dark);">NET CAPITAL RETAINED (SETTLEMENT)</div>
-                    <div class="roi-total" id="roi-total">$0.00</div>
-                    <div style="font-size: 11px; color: var(--text-light); margin-top: 5px;">Live tracking realized savings</div>
+                
+                <div id="msg-2" class="chat-bubble">
+                    Please wait while we secure a hotel room for you nearby...
                 </div>
+
+                <div id="msg-3" class="chat-bubble" style="background: #e0e7ff; color: #3730a3;">
+                    ✅ <strong>Room Secured:</strong><br>Grand Airport Hotel (4 Stars)<br>Shuttle: Gate 4
+                </div>
+
+                <div id="offer-card" class="offer-ui">
+                    <div style="font-size: 12px; opacity: 0.8; text-transform: uppercase;">Instant Compensation</div>
+                    <div style="font-size: 42px; font-weight: 800; margin: 10px 0;">$600</div>
+                    <div style="font-size: 12px; line-height: 1.4;">Get immediate travel credit instead of waiting for a claim.</div>
+                    <div style="background: rgba(255,255,255,0.2); height: 1px; margin: 15px 0;"></div>
+                    <div style="font-size: 11px; font-style: italic;">Tap below to sign & accept</div>
+                </div>
+
+                <button id="sign-btn" class="sign-btn hidden" onclick="signAndClose()">
+                    <span>✍️</span> Tap to Sign & Accept
+                </button>
+
             </div>
         </div>
     </div>
 
-
-    <div class="panel pax-panel">
-        <div class="pax-header">
-            <div class="pax-logo">SkyRelief Assistant</div>
+    <div class="col-hotel">
+        <div class="card hotel-interface" id="hotel-panel">
+            <div style="opacity: 0.5; font-size: 60px; margin-bottom: 20px;">🏨</div>
+            <h3 style="margin: 0;">Lobby Standby</h3>
+            <p style="color: var(--text-muted); font-size: 14px;">Waiting for network...</p>
         </div>
-        <div class="panel-body" style="padding: 0;">
+
+        <div class="card hotel-interface hidden" id="hotel-active">
+            <div class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">
+                <span class="live-dot"></span> LIVE AUCTION
+            </div>
+            <div style="font-size: 14px; margin-top: 10px;">40 Rooms Required Immediately</div>
             
-            <div id="pax-step1" class="pax-step fade-in hidden" style="padding: 25px;">
-                <div class="msg-card">
-                    <strong>Update 1 of 2:</strong> We apologize for the delay. We have secured immediate accommodation for you.
-                </div>
-                <div class="hotel-card">
-                    <div style="font-size: 32px; margin-bottom: 10px;">🏨</div>
-                    <div style="font-size: 12px; opacity: 0.8; text-transform: uppercase;">Assigned Hotel</div>
-                    <div id="pax-hotel-name" style="font-size: 22px; font-weight: 900; margin: 5px 0;">Searching...</div>
-                    <div style="font-size: 11px; margin-top: 10px;">Premium King Room | Shuttle Included</div>
-                </div>
-                <button id="btn-to-offer" class="btn btn-primary hidden" onclick="nextStep('pax-step2')">Continue to Compensation ➔</button>
-            </div>
+            <div class="bid-price" id="live-price">€220</div>
+            <div style="color: var(--text-muted); font-size: 12px; margin-bottom: 30px;">3 Competitors Bidding...</div>
 
-            <div id="pax-step2" class="pax-step fade-in hidden" style="padding: 25px;">
-                 <div class="msg-card">
-                    <strong>Update 2 of 2:</strong> Instead of waiting months for a claim, we can offer you an instant settlement.
-                </div>
-                <div class="offer-card">
-                    <div style="font-size: 12px; font-weight: 700; color: var(--text-light); text-transform: uppercase;">Instant Travel Credit</div>
-                    <div style="font-size: 48px; font-weight: 900; color: var(--success); margin: 10px 0;">$600</div>
-                    <div style="font-size: 11px; color: var(--text-light);">Valid for 24 months on any partner flight.</div>
-                </div>
-                <button class="btn btn-success" style="margin-bottom: 10px;" onclick="nextStep('pax-step3')">✅ Accept $600 Credit</button>
-                <button class="btn btn-outline">No thanks, I'll file manually</button>
-            </div>
-
-            <div id="pax-step3" class="pax-step fade-in hidden" style="padding: 25px;">
-                <h3 style="text-align: center;">Finalize Settlement</h3>
-                <p style="font-size: 11px; color: var(--text-light); text-align: center; margin-bottom: 20px;">By signing, you accept the $600 credit as full and final settlement for flight LY315 disruption.</p>
-                
-                <div id="signature-pad" class="sign-pad" onclick="signDocument(this)">
-                    <span style="color: var(--text-light);">Tap to create digital signature</span>
-                </div>
-                
-                <button id="btn-finalize" class="btn btn-primary hidden" onclick="finishJourney()">Complete & Send Vouchers</button>
-            </div>
-
-            <div id="pax-success" class="pax-step fade-in hidden" style="padding: 40px 25px; text-align: center;">
-                <div style="font-size: 64px; margin-bottom: 20px;">🎉</div>
-                <h2 style="color: var(--success);">All Set!</h2>
-                <p style="color: var(--text-light);">Hotel voucher and $600 credit have been sent to your email.</p>
-            </div>
-
+            <button class="hotel-btn" onclick="winBid()">⚡ WIN BLOCK NOW</button>
+        </div>
+        
+        <div class="card hotel-interface hidden" id="hotel-won">
+            <div style="font-size: 60px; margin-bottom: 20px;">🏆</div>
+            <h2 style="color: var(--success); margin: 0;">You Won!</h2>
+            <p style="color: var(--text-muted);">Guest details incoming.</p>
         </div>
     </div>
-
-
-    <div class="hotel-col">
-        <div class="panel hotel-panel">
-            <div class="panel-header" style="background: var(--hotel-bg);">Lobby Terminal</div>
-            <div class="panel-body" style="padding: 0;">
-                
-                <div id="hotel-idle" class="lobby-screen fade-in">
-                    <div style="font-size: 40px; opacity: 0.3;">💤</div>
-                    <h3 style="color: var(--text-light);">Standby Mode</h3>
-                    <p style="font-size: 12px; color: var(--text-light);">Waiting for network requests...</p>
-                </div>
-
-                <div id="hotel-active" class="lobby-screen fade-in hidden" style="background: #fff1f2;">
-                    <div style="background: var(--danger); color: white; padding: 8px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; margin: 0 auto 20px;">🚨 IROPS ALERT: 40 ROOMS NEEDED</div>
-                    <div style="font-size: 11px; font-weight: 700; color: var(--text-light);">CURRENT MARKET BID</div>
-                    <div id="live-price" class="live-price">€220</div>
-                    
-                    <input type="text" id="hotel-name-in" class="hotel-input" value="Grand Airport Hotel">
-                    <button class="btn" style="background: var(--hotel-bg); color: white;" onclick="winBid()">⚡ WIN BLOCK NOW</button>
-                </div>
-
-                <div id="hotel-won" class="lobby-screen fade-in hidden" style="background: #f0fdf4;">
-                    <div style="font-size: 50px;">🏆</div>
-                    <h2 style="color: var(--success);">Block Secured!</h2>
-                    <p style="color: var(--text-light);">Guests are being routed to your property.</p>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
 
     <script>
-        let log = (m) => document.getElementById('air-log').innerHTML += `<br>> ${m}`;
-        let auctionInterval;
-        let currentPrice = 220;
+        const log = (m) => document.getElementById('console-log').innerHTML = `> ${m}`;
+        let price = 220;
+        let interval;
 
-        // 1. Trigger the Event
-        function triggerIROPS() {
-            log("IROPS EVENT STARTED: LY315 Delayed.");
-            // Show Hotel Interface
-            document.getElementById('hotel-idle').classList.add('hidden');
-            document.getElementById('hotel-active').classList.remove('hidden');
-            // Show Passenger Interface (Step 1)
-            document.getElementById('pax-step1').classList.remove('hidden');
+        function runScenario() {
+            log("IROPS DETECTED. Starting protocols...");
             
-            // Start Price Drop Sim
-            auctionInterval = setInterval(() => {
-                currentPrice -= 5;
-                document.getElementById('live-price').innerText = `€${currentPrice}`;
-            }, 1500);
+            // 1. Pax Message
+            setTimeout(() => document.getElementById('msg-1').classList.add('visible'), 500);
+            setTimeout(() => document.getElementById('msg-2').classList.add('visible'), 1500);
+
+            // 2. Activate Hotel
+            setTimeout(() => {
+                document.getElementById('hotel-panel').classList.add('hidden');
+                document.getElementById('hotel-active').classList.remove('hidden');
+                startBidding();
+                log("Hotel Auction Live. Broadcasting to partners...");
+            }, 2500);
         }
 
-        // 2. Hotel Wins Bid
+        function startBidding() {
+            interval = setInterval(() => {
+                price -= Math.floor(Math.random() * 5) + 3;
+                document.getElementById('live-price').innerText = `€${price}`;
+            }, 1000);
+        }
+
         function winBid() {
-            clearInterval(auctionInterval);
-            const hotelName = document.getElementById('hotel-name-in').value;
-            log(`Hotel Winner: ${hotelName} at €${currentPrice}`);
-            
-            // Update Hotel UI
+            clearInterval(interval);
             document.getElementById('hotel-active').classList.add('hidden');
             document.getElementById('hotel-won').classList.remove('hidden');
-
-            // Update Passenger UI
-            document.getElementById('pax-hotel-name').innerText = hotelName;
-            document.getElementById('btn-to-offer').classList.remove('hidden');
-
-            // Update Airline ROI (Partial)
-            document.getElementById('roi-hotel').innerText = "+$8,400"; // Fake savings calc
+            
+            // Pax gets room
+            document.getElementById('msg-3').classList.add('visible');
+            
+            // Show Offer
+            setTimeout(() => {
+                document.getElementById('offer-card').classList.add('visible');
+                document.getElementById('sign-btn').classList.remove('hidden');
+            }, 1000);
+            
+            log(`Hotel Secured @ €${price}. Offer sent to pax.`);
         }
 
-        // 3. Passenger Navigation
-        function nextStep(stepId) {
-            document.querySelectorAll('.pax-step').forEach(el => el.classList.add('hidden'));
-            document.getElementById(stepId).classList.remove('hidden');
+        function signAndClose() {
+            document.getElementById('sign-btn').innerHTML = "✅ Verified & Signed";
+            document.getElementById('sign-btn').style.background = "#10b981";
+            
+            // Update ROI
+            animateValue("total-saved", 0, 45200, 2000);
+            document.getElementById('risk-val').innerHTML = '<span style="color:#94a3b8; text-decoration:line-through">-$85k</span>';
+            document.getElementById('conv-val').innerText = "100%";
+            
+            log("SETTLEMENT COMPLETE. ROI REALIZED.");
         }
 
-        // 4. Signing Simulation
-        function signDocument(pad) {
-            pad.classList.add('signed');
-            pad.innerHTML = "Jonatha Doe"; // Simulated signature
-            document.getElementById('btn-finalize').classList.remove('hidden');
+        function animateValue(id, start, end, duration) {
+            let obj = document.getElementById(id);
+            let range = end - start;
+            let minTimer = 50;
+            let stepTime = Math.abs(Math.floor(duration / (range / 100))); 
+            
+            let startTime = new Date().getTime();
+            let endTime = startTime + duration;
+            let timer;
+          
+            function run() {
+                let now = new Date().getTime();
+                let remaining = Math.max((endTime - now) / duration, 0);
+                let value = Math.round(end - (remaining * range));
+                obj.innerHTML = "$" + value.toLocaleString();
+                if (value == end) { clearInterval(timer); }
+            }
+            
+            timer = setInterval(run, stepTime);
+            run();
         }
-
-        // 5. Finalize Journey
-        function finishJourney() {
-            nextStep('pax-success');
-            log("SETTLEMENT FINALIZED: Pax signed waiver.");
-            // Final ROI Update
-            document.getElementById('roi-total').innerText = "$45,320";
-             document.getElementById('roi-total').style.transform = "scale(1.1)";
-             setTimeout(() => { document.getElementById('roi-total').style.transform = "scale(1)"; }, 300);
-        }
-
     </script>
 </body>
 </html>
