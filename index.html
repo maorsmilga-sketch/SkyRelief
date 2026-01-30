@@ -26,9 +26,7 @@
             height: 100vh; width: 100vw; overflow: hidden;
             display: grid; grid-template-rows: 70px 1fr;
             
-            /* --- FIXED BACKGROUND --- */
-            /* הורדתי את הכהות (0.5 ו-0.3) כדי שיראו את המפה */
-            /* הוספתי ./ לפני שם הקובץ */
+            /* FIXED BACKGROUND */
             background: linear-gradient(rgba(2, 6, 23, 0.5), rgba(2, 6, 23, 0.3)), url('./world-map-bg.jpg');
             background-size: cover;
             background-position: center;
@@ -98,12 +96,60 @@
         .finger-pointer.click { transform: scale(0.8); background: rgba(255,255,255,0.6); transition: transform 0.1s; }
 
         /* MARKET STYLES */
-        .bid-item { display: flex; align-items: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 16px; margin-bottom: 10px; transition: 0.3s; gap: 15px; border: 1px solid transparent; }
+        .bid-item { 
+            display: flex; align-items: center; padding: 12px; 
+            background: rgba(255,255,255,0.03); border-radius: 16px; 
+            margin-bottom: 10px; gap: 15px; border: 1px solid transparent; 
+            opacity: 0; transform: translateX(20px); transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .bid-item.appear { opacity: 1; transform: translateX(0); }
         .bid-item.winner { background: rgba(16, 185, 129, 0.1); border-color: var(--success); transform: scale(1.02); box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.3); }
         .bid-item.disabled { opacity: 0.3; filter: grayscale(1); }
         .hotel-thumb { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
         .bid-info { flex-grow: 1; }
         .bid-val { font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700; white-space: nowrap; }
+
+        /* --- FINAL SUMMARY MODAL --- */
+        .summary-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(2, 6, 23, 0.7); backdrop-filter: blur(8px);
+            z-index: 200; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.8s ease;
+        }
+        .summary-overlay.visible { opacity: 1; pointer-events: all; }
+
+        .summary-card {
+            width: 500px; padding: 40px; border-radius: 30px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+            backdrop-filter: blur(30px);
+            text-align: center; transform: scale(0.9); transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .summary-overlay.visible .summary-card { transform: scale(1); }
+
+        .chart-container {
+            display: flex; align-items: flex-end; justify-content: center; gap: 40px;
+            height: 200px; margin: 30px 0; border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+        .bar-group { display: flex; flex-direction: column; align-items: center; width: 80px; }
+        .bar { width: 100%; border-radius: 8px 8px 0 0; transition: height 1.5s ease-out; height: 0; }
+        .bar-red { background: linear-gradient(to top, #ef4444, #f87171); box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
+        .bar-green { background: linear-gradient(to top, #10b981, #34d399); box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
+        .bar-label { font-size: 11px; margin-top: 10px; color: var(--text-sec); letter-spacing: 0.5px; }
+        .bar-value { margin-bottom: 8px; font-weight: 700; font-family: 'Rajdhani'; font-size: 18px; }
+
+        .contact-btn {
+            background: linear-gradient(90deg, #3b82f6, #6366f1);
+            border: none; padding: 16px 32px; border-radius: 12px;
+            color: white; font-weight: 700; font-size: 16px; font-family: 'Outfit';
+            cursor: pointer; margin-top: 20px; transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+            text-decoration: none; display: inline-block;
+        }
+        .contact-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 30px -5px rgba(59, 130, 246, 0.6); }
+
     </style>
 </head>
 <body>
@@ -155,9 +201,7 @@
                         <img src="bot-avatar.png" class="bot-avatar" alt="Bot">
                         <span>Travel Assistant</span>
                     </div>
-                    
                     <div id="chat-container" style="flex-grow: 1;"></div>
-                    
                     <div class="voucher-container" id="final-vouchers">
                         <div class="voucher">
                             <div style="font-size:10px; font-weight:700; color:#334155;">HOTEL CHECK-IN</div>
@@ -169,16 +213,13 @@
                             <div style="font-size:10px; opacity:0.7;">To Hotel</div>
                         </div>
                     </div>
-
                     <div class="finger-pointer" id="finger">👆</div>
-
                     <div class="legal-modal" id="legal-modal">
                         <div style="text-align:center; font-weight:700; color:#1e293b; margin-bottom:15px;">EU261 Settlement Agreement</div>
                         <div class="legal-text">
                             <strong>WAIVER AND RELEASE OF LIABILITY</strong><br><br>
                             By signing below, the passenger accepts the offered travel credit ($600 USD value) as full and final settlement for flight disruption LY-315. 
-                            Passenger hereby irrevocably waives any further right to claim cash compensation under EU Regulation 261/2004 or any other applicable law against the airline. 
-                            This agreement is binding and final. The travel credit is non-transferable and valid for 24 months.
+                            Passenger hereby irrevocably waives any further right to claim cash compensation under EU Regulation 261/2004 or any other applicable law against the airline.
                         </div>
                         <div class="signature-pad" id="sig-pad-container">
                             <div style="position:absolute; top:5px; left:10px; font-size:10px; color:#94a3b8;">SIGN HERE:</div>
@@ -192,27 +233,56 @@
 
         <div class="glass-panel">
             <div class="panel-title" style="color:var(--text-sec); font-size:12px; margin-bottom:15px; letter-spacing: 1px;">HOTEL SOURCING (Req: 450 Pax)</div>
-            <div id="market-list" style="opacity:0.5;">
-                
+            <div id="market-list">
                 <div class="bid-item" id="bid-1">
                     <img src="hotel-airport.jpg" class="hotel-thumb" alt="Hotel 1">
                     <div class="bid-info"><div style="font-weight:600">Grand Airport</div><div style="font-size:11px; color:var(--danger);">⚠ 150 Rooms</div></div>
                     <div class="bid-val" id="p1">€250</div>
                 </div>
-                
                 <div class="bid-item" id="bid-2">
                     <img src="hotel-city.jpg" class="hotel-thumb" alt="Hotel 2">
                     <div class="bid-info"><div style="font-weight:600">Metro Hub</div><div style="font-size:11px; color:var(--success);">✔ 500 Rooms</div></div>
                     <div class="bid-val" id="p2">€250</div>
                 </div>
-
                 <div class="bid-item" id="bid-3">
                     <img src="hotel-boutique.jpg" class="hotel-thumb" alt="Hotel 3">
                     <div class="bid-info"><div style="font-weight:600">Regal Suites</div><div style="font-size:11px; color:var(--danger);">⚠ 80 Rooms</div></div>
                     <div class="bid-val" id="p3">€250</div>
                 </div>
-
             </div>
+        </div>
+    </div>
+
+    <div class="summary-overlay" id="summary-overlay">
+        <div class="summary-card">
+            <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--accent);">Simulation Complete</div>
+            <h2 style="font-size:32px; font-weight:800; margin:10px 0 30px 0;">Executive Summary</h2>
+            
+            <div style="font-size:14px; color:var(--text-sec); margin-bottom:20px; line-height:1.6;">
+                By automating hotel sourcing and offering immediate travel vouchers, SkyRelief prevented mass cash claims under EU261 regulations.
+            </div>
+
+            <div class="chart-container">
+                <div class="bar-group">
+                    <div class="bar-value" style="color:#f87171">$270k</div>
+                    <div class="bar bar-red" id="bar-risk" style="height:0%"></div>
+                    <div class="bar-label">EU261 RISK</div>
+                </div>
+                
+                <div class="bar-group">
+                    <div class="bar-value" style="color:#34d399">$54k</div>
+                    <div class="bar bar-green" id="bar-actual" style="height:0%"></div>
+                    <div class="bar-label">ACTUAL COST</div>
+                </div>
+            </div>
+
+            <div style="font-family:'Rajdhani'; font-size:24px; color:var(--success); margin-bottom:30px;">
+                TOTAL SAVINGS: <strong>$216,000</strong>
+            </div>
+
+            <a href="mailto:office@skyrelief.com" class="contact-btn">
+                Contact SkyRelief Office →
+            </a>
         </div>
     </div>
 
@@ -221,15 +291,9 @@
         window.onload = () => { setTimeout(initScenario, 2000); };
 
         async function initScenario() {
-            // 1. Flight Cancelled Trigger
             document.getElementById('target-flight').classList.add('cancelled');
             document.getElementById('target-tag').innerText = "CANCELLED";
-            
-            // 2. Run Hotel Auction
-            document.getElementById('market-list').style.opacity = "1";
             await runAuction();
-            
-            // 3. Chat Flow
             sendMsg("⚠️ <strong>Flight Alert:</strong> Flight LY-315 cancelled. 450 pax affected.");
             await delay(1500);
             sendMsg("✅ <strong>Solution Found:</strong> Metro Hub Hotel (Capacity guaranteed).");
@@ -238,14 +302,21 @@
         }
 
         async function runAuction() {
+            const h1 = document.getElementById('bid-1');
+            const h2 = document.getElementById('bid-2');
+            const h3 = document.getElementById('bid-3');
+            
+            h1.classList.add('appear'); await delay(600);
+            h2.classList.add('appear'); await delay(600);
+            h3.classList.add('appear'); await delay(800);
+
             let p1=250, p2=250, p3=250;
             for(let i=0; i<10; i++) {
                 p1 -= Math.floor(Math.random()*4); p2 -= Math.floor(Math.random()*7); p3 -= Math.floor(Math.random()*3);
                 document.getElementById('p1').innerText = `€${p1}`; document.getElementById('p2').innerText = `€${p2}`; document.getElementById('p3').innerText = `€${p3}`;
                 await delay(150);
             }
-            document.getElementById('bid-1').classList.add('disabled'); document.getElementById('bid-3').classList.add('disabled');
-            document.getElementById('bid-2').classList.add('winner');
+            h1.classList.add('disabled'); h3.classList.add('disabled'); h2.classList.add('winner');
         }
 
         function sendMsg(html) {
@@ -264,30 +335,20 @@
             </div>`;
             const wrapper = document.createElement('div'); wrapper.innerHTML = offerHTML;
             document.getElementById('chat-container').appendChild(wrapper.firstElementChild);
-
-            // START FINGER SEQUENCE
             await runSignatureFlow();
         }
 
-        // --- SMART FINGER LOGIC ---
+        // SMART FINGER LOGIC
         function moveFingerToTarget(targetId, offsetX = 0, offsetY = 0) {
             const finger = document.getElementById('finger');
             const target = document.getElementById(targetId);
             const screenArea = document.getElementById('phone-screen-area');
-
             if(!target) return;
-
-            // Get positions relative to viewport
             const targetRect = target.getBoundingClientRect();
             const screenRect = screenArea.getBoundingClientRect();
-
-            // Calculate position relative to the phone screen container
             const relativeTop = (targetRect.top - screenRect.top) + (targetRect.height / 2) + offsetY;
             const relativeLeft = (targetRect.left - screenRect.left) + (targetRect.width / 2) + offsetX;
-
-            finger.style.top = `${relativeTop}px`;
-            finger.style.left = `${relativeLeft}px`;
-            finger.classList.add('active');
+            finger.style.top = `${relativeTop}px`; finger.style.left = `${relativeLeft}px`; finger.classList.add('active');
         }
 
         async function runSignatureFlow() {
@@ -296,44 +357,30 @@
             const modal = document.getElementById('legal-modal');
             const confirmBtn = document.getElementById('confirm-sign-btn');
             
-            // STEP 1: Move to Review Button (Smart Calculation)
             await delay(1000);
-            moveFingerToTarget('review-btn', 20, 10); 
-            
+            moveFingerToTarget('review-btn', 20, 10);
             await delay(800);
             finger.classList.add('click');
             reviewBtn.innerHTML = "Opening Agreement...";
             await delay(500);
             finger.classList.remove('click');
             
-            // STEP 2: Open Modal & Sign
             modal.classList.add('active');
             await delay(1000);
-            
-            // Move to signature pad area
             moveFingerToTarget('sig-pad-container', 0, 0);
-            
             await delay(800);
-            finger.classList.add('click'); 
-            simulateDrawing(); 
-            await delay(1500); 
-            finger.classList.remove('click');
+            finger.classList.add('click'); simulateDrawing(); await delay(1500); finger.classList.remove('click');
 
-            // STEP 3: Click Confirm inside modal
             await delay(500);
             moveFingerToTarget('confirm-sign-btn', 0, 0);
-            
             await delay(800);
             finger.classList.add('click');
             confirmBtn.innerHTML = "Verifying...";
             confirmBtn.style.background = "#10b981";
 
             await delay(800);
-            finger.classList.remove('click');
-            finger.classList.remove('active'); 
-            modal.classList.remove('active'); 
+            finger.classList.remove('click'); finger.classList.remove('active'); modal.classList.remove('active'); 
 
-            // STEP 4: Show Final State & Vouchers
             reviewBtn.innerHTML = "✅ Agreement Signed";
             reviewBtn.style.background = "#10b981"; reviewBtn.style.color = "white";
             document.getElementById('final-vouchers').classList.add('visible');
@@ -359,9 +406,22 @@
             let val = 0; const target = 216500;
             const interval = setInterval(() => {
                 val += target/50;
-                if(val >= target) { val = target; clearInterval(interval); }
+                if(val >= target) { 
+                    val = target; clearInterval(interval);
+                    // TRIGGER SUMMARY MODAL
+                    setTimeout(showSummary, 1000); 
+                }
                 display.innerText = "$" + Math.floor(val).toLocaleString();
             }, 30);
+        }
+
+        function showSummary() {
+            document.getElementById('summary-overlay').classList.add('visible');
+            setTimeout(() => {
+                // Animate Chart Bars
+                document.getElementById('bar-risk').style.height = '100%';
+                document.getElementById('bar-actual').style.height = '20%'; // Approx 54k/270k
+            }, 500);
         }
     </script>
 </body>
