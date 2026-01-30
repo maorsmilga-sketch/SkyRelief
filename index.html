@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyRelief | Ultimate Demo</title>
+    <title>SkyRelief | Enterprise Demo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&family=Rajdhani:wght@500;600;700&family=Lora:ital@0;1&display=swap" rel="stylesheet">
@@ -25,11 +25,12 @@
             font-family: 'Outfit', sans-serif;
             height: 100vh; width: 100vw; overflow: hidden;
             display: grid; grid-template-rows: 70px 1fr;
-            /* UPDATED PATH: Removed 'images/' */
-            background-image: url('world-map-bg.jpg'), radial-gradient(at 50% 50%, rgba(59, 130, 246, 0.1) 0px, transparent 70%);
-            background-size: cover, cover;
+            
+            /* FIXED BACKGROUND: Simple overlay method */
+            background: linear-gradient(rgba(2, 6, 23, 0.85), rgba(2, 6, 23, 0.7)), url('world-map-bg.jpg');
+            background-size: cover;
             background-position: center;
-            background-blend-mode: overlay;
+            background-attachment: fixed;
         }
 
         /* --- HEADER & LAYOUT --- */
@@ -81,9 +82,17 @@
         .ride-logo-img { width: 60px; height: auto; margin-bottom: 8px; object-fit: contain; }
 
         /* Finger Animation */
-        .finger-pointer { position: absolute; width: 50px; height: 50px; background: rgba(255, 255, 255, 0.3); border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); pointer-events: none; z-index: 100; opacity: 0; transition: all 0.6s ease; display: flex; justify-content: center; font-size: 24px; backdrop-filter: blur(5px); }
+        .finger-pointer { 
+            position: absolute; width: 50px; height: 50px; 
+            background: rgba(255, 255, 255, 0.3); border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); 
+            pointer-events: none; z-index: 100; opacity: 0; 
+            transition: top 0.8s cubic-bezier(0.22, 1, 0.36, 1), left 0.8s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s; 
+            display: flex; justify-content: center; font-size: 24px; backdrop-filter: blur(5px); 
+            /* Start hidden */
+            top: 100%; left: 50%;
+        }
         .finger-pointer.active { opacity: 1; }
-        .finger-pointer.click { transform: scale(0.8); background: rgba(255,255,255,0.6); }
+        .finger-pointer.click { transform: scale(0.8); background: rgba(255,255,255,0.6); transition: transform 0.1s; }
 
         /* MARKET STYLES */
         .bid-item { display: flex; align-items: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 16px; margin-bottom: 10px; transition: 0.3s; gap: 15px; border: 1px solid transparent; }
@@ -168,7 +177,7 @@
                             Passenger hereby irrevocably waives any further right to claim cash compensation under EU Regulation 261/2004 or any other applicable law against the airline. 
                             This agreement is binding and final. The travel credit is non-transferable and valid for 24 months.
                         </div>
-                        <div class="signature-pad">
+                        <div class="signature-pad" id="sig-pad-container">
                             <div style="position:absolute; top:5px; left:10px; font-size:10px; color:#94a3b8;">SIGN HERE:</div>
                             <canvas id="sig-canvas" class="sig-canvas"></canvas>
                         </div>
@@ -257,17 +266,39 @@
             await runSignatureFlow();
         }
 
+        // --- NEW SMART FINGER LOGIC ---
+        // This function finds exactly where the button is on YOUR screen
+        function moveFingerToTarget(targetId, offsetX = 0, offsetY = 0) {
+            const finger = document.getElementById('finger');
+            const target = document.getElementById(targetId);
+            const screenArea = document.getElementById('phone-screen-area');
+
+            if(!target) return;
+
+            // Get positions relative to viewport
+            const targetRect = target.getBoundingClientRect();
+            const screenRect = screenArea.getBoundingClientRect();
+
+            // Calculate position relative to the phone screen container
+            // We center the finger on the target element
+            const relativeTop = (targetRect.top - screenRect.top) + (targetRect.height / 2) + offsetY;
+            const relativeLeft = (targetRect.left - screenRect.left) + (targetRect.width / 2) + offsetX;
+
+            finger.style.top = `${relativeTop}px`;
+            finger.style.left = `${relativeLeft}px`;
+            finger.classList.add('active');
+        }
+
         async function runSignatureFlow() {
             const finger = document.getElementById('finger');
             const reviewBtn = document.getElementById('review-btn');
             const modal = document.getElementById('legal-modal');
             const confirmBtn = document.getElementById('confirm-sign-btn');
             
-            // STEP 1: Click initial review button
+            // STEP 1: Move to Review Button (Smart Calculation)
             await delay(1000);
-            finger.classList.add('active');
-            // Adjusted coordinates for the "Tap to Review" button
-            finger.style.top = "510px"; finger.style.left = "180px"; 
+            moveFingerToTarget('review-btn', 20, 10); // +Offset to look natural
+            
             await delay(800);
             finger.classList.add('click');
             reviewBtn.innerHTML = "Opening Agreement...";
@@ -279,7 +310,8 @@
             await delay(1000);
             
             // Move to signature pad area
-            finger.style.top = "450px"; finger.style.left = "180px";
+            moveFingerToTarget('sig-pad-container', 0, 0);
+            
             await delay(800);
             finger.classList.add('click'); // Press down to start signing
             simulateDrawing(); // Scribble animation on canvas
@@ -288,8 +320,8 @@
 
             // STEP 3: Click Confirm inside modal
             await delay(500);
-            // Move to confirm button area
-            finger.style.top = "560px"; finger.style.left = "180px";
+            moveFingerToTarget('confirm-sign-btn', 0, 0);
+            
             await delay(800);
             finger.classList.add('click');
             confirmBtn.innerHTML = "Verifying...";
