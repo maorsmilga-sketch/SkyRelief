@@ -3,9 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>SkyRelief | Automated IROPS Intelligence</title>
+    <meta name="description" content="SkyRelief is an AI-driven IROPS engine for airlines. We automate EU261 compliance, convert cash liabilities into vouchers, and optimize hotel sourcing in real-time.">
+    
+    <meta property="og:title" content="SkyRelief | The Autonomous IROPS Engine">
+    <meta property="og:description" content="Automated legal shield and recovery for airlines. Stealth mode active.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.sky-relief.com">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SkyRelief",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Cloud",
+      "description": "SkyRelief is an AI-powered disruption management platform for airlines. It automates EU261 compliance, reduces cash payouts, and manages passenger recovery via digital vouchers and blind bidding for hotels.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/PreOrder"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "SkyRelief AI",
+        "founder": {
+            "@type": "Person",
+            "name": "Ido Reuveni"
+        }
+      }
+    }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         body { font-family: 'Inter', sans-serif; }
         
@@ -49,6 +83,7 @@
         
         .hidden { display: none; }
         
+        /* Integration Logos Style */
         .logo-text { 
             font-family: 'Monaco', 'Consolas', monospace; 
             opacity: 0.4; 
@@ -181,110 +216,4 @@
                 <p class="text-slate-400 text-sm mt-1">Authorized personnel only.</p>
             </div>
             <div class="grid grid-cols-2 gap-2 bg-slate-800/50 p-1 rounded-lg mb-6">
-                <button id="btnAirline" onclick="selectRole('airline')" class="flex items-center justify-center gap-2 py-2.5 rounded text-sm font-medium transition-all bg-slate-700 text-white shadow shadow-black/20">Airline</button>
-                <button id="btnHotel" onclick="selectRole('hotel')" class="flex items-center justify-center gap-2 py-2.5 rounded text-sm font-medium transition-all text-slate-400 hover:text-slate-200">Hotel</button>
-            </div>
-            <form onsubmit="handleLogin(event)" class="space-y-4">
-                <div><label class="block text-xs font-medium text-slate-400 mb-1.5 ml-1">Corporate ID</label><input type="email" required placeholder="name@company.com" class="w-full px-4 py-3 rounded-lg input-dark text-sm"></div>
-                <div><label class="block text-xs font-medium text-slate-400 mb-1.5 ml-1">Password</label><input type="password" required placeholder="••••••••••••" class="w-full px-4 py-3 rounded-lg input-dark text-sm"></div>
-                <div class="pt-2"><button type="submit" id="loginSubmitBtn" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-all text-sm flex items-center justify-center">Authenticate Securely</button></div>
-            </form>
-            <div id="loginError" class="hidden mt-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg flex items-start gap-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                <div class="text-xs text-left"><p class="font-bold text-red-400 mb-0.5">Access Denied</p><p class="text-red-200/70">Contact <a href="mailto:office@sky-relief.com" class="text-red-300 underline">office@sky-relief.com</a></p></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="simulationModal" class="hidden-modal fixed inset-0 z-50 flex items-center justify-center px-4 modal-transition">
-        <div class="absolute inset-0 bg-black/90 backdrop-blur-md" onclick="closeSimulation()"></div>
-        
-        <div class="relative z-10 w-full max-w-6xl h-[85vh] bg-slate-900 rounded-xl shadow-2xl border border-slate-700 overflow-hidden flex flex-col animate-fade-in">
-            
-            <div class="flex justify-between items-center p-4 bg-slate-800 border-b border-slate-700">
-                <div class="flex items-center gap-3">
-                    <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-xs font-mono text-slate-300 uppercase tracking-wider">Live Simulation Environment</span>
-                </div>
-                <button onclick="closeSimulation()" class="text-slate-400 hover:text-white transition-colors bg-slate-700 hover:bg-slate-600 rounded px-3 py-1 text-xs font-medium">
-                    Close Simulation [ESC]
-                </button>
-            </div>
-
-            <div class="flex-grow relative bg-white">
-                <iframe src="simulation.html" class="absolute inset-0 w-full h-full border-0" title="SkyRelief Simulation"></iframe>
-            </div>
-        </div>
-    </div>
-
-    <footer class="border-t border-slate-800 bg-slate-950 py-10 relative z-10 mt-auto">
-        <div class="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="text-slate-500 text-sm">&copy; 2025 SkyRelief AI.</div>
-            <div class="flex gap-6 text-sm font-medium text-slate-500"><span class="flex items-center gap-1.5">SOC2 Compliance</span></div>
-        </div>
-    </footer>
-
-    <script>
-        // --- LOGIN LOGIC ---
-        function openLogin() {
-            const modal = document.getElementById('loginModal');
-            document.getElementById('loginError').classList.add('hidden');
-            document.getElementById('loginSubmitBtn').innerHTML = 'Authenticate Securely';
-            document.getElementById('loginSubmitBtn').disabled = false;
-            modal.classList.remove('hidden-modal');
-            modal.classList.add('visible-modal');
-        }
-        function closeLogin() {
-            document.getElementById('loginModal').classList.remove('visible-modal');
-            document.getElementById('loginModal').classList.add('hidden-modal');
-        }
-        function selectRole(role) {
-            const btnAirline = document.getElementById('btnAirline');
-            const btnHotel = document.getElementById('btnHotel');
-            const activeClass = ['bg-slate-700', 'text-white', 'shadow', 'shadow-black/20'];
-            const inactiveClass = ['text-slate-400', 'hover:text-slate-200'];
-            if (role === 'airline') {
-                btnAirline.classList.add(...activeClass); btnAirline.classList.remove(...inactiveClass);
-                btnHotel.classList.remove(...activeClass); btnHotel.classList.add(...inactiveClass);
-            } else {
-                btnHotel.classList.add(...activeClass); btnHotel.classList.remove(...inactiveClass);
-                btnAirline.classList.remove(...activeClass); btnAirline.classList.add(...inactiveClass);
-            }
-        }
-        function handleLogin(event) {
-            event.preventDefault();
-            const btn = document.getElementById('loginSubmitBtn');
-            const errorDiv = document.getElementById('loginError');
-            btn.disabled = true;
-            btn.innerHTML = 'Verifying...';
-            errorDiv.classList.add('hidden');
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.innerHTML = 'Authenticate Securely';
-                errorDiv.classList.remove('hidden');
-            }, 1500);
-        }
-
-        // --- SIMULATION LOGIC (NEW!) ---
-        function openSimulation() {
-            const modal = document.getElementById('simulationModal');
-            modal.classList.remove('hidden-modal');
-            modal.classList.add('visible-modal');
-        }
-
-        function closeSimulation() {
-            const modal = document.getElementById('simulationModal');
-            modal.classList.remove('visible-modal');
-            modal.classList.add('hidden-modal');
-        }
-
-        // Close modals on ESC key
-        document.addEventListener('keydown', function(event) { 
-            if (event.key === "Escape") {
-                closeLogin();
-                closeSimulation();
-            }
-        });
-    </script>
-</body>
-</html>
+                <button
