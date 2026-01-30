@@ -26,10 +26,13 @@
             height: 100vh; width: 100vw; overflow: hidden;
             display: grid; grid-template-rows: 70px 1fr;
             
-            /* FIXED BACKGROUND: Simple overlay method */
-            background: linear-gradient(rgba(2, 6, 23, 0.85), rgba(2, 6, 23, 0.7)), url('world-map-bg.jpg');
+            /* --- FIXED BACKGROUND --- */
+            /* הורדתי את הכהות (0.5 ו-0.3) כדי שיראו את המפה */
+            /* הוספתי ./ לפני שם הקובץ */
+            background: linear-gradient(rgba(2, 6, 23, 0.5), rgba(2, 6, 23, 0.3)), url('./world-map-bg.jpg');
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
             background-attachment: fixed;
         }
 
@@ -266,8 +269,7 @@
             await runSignatureFlow();
         }
 
-        // --- NEW SMART FINGER LOGIC ---
-        // This function finds exactly where the button is on YOUR screen
+        // --- SMART FINGER LOGIC ---
         function moveFingerToTarget(targetId, offsetX = 0, offsetY = 0) {
             const finger = document.getElementById('finger');
             const target = document.getElementById(targetId);
@@ -280,7 +282,6 @@
             const screenRect = screenArea.getBoundingClientRect();
 
             // Calculate position relative to the phone screen container
-            // We center the finger on the target element
             const relativeTop = (targetRect.top - screenRect.top) + (targetRect.height / 2) + offsetY;
             const relativeLeft = (targetRect.left - screenRect.left) + (targetRect.width / 2) + offsetX;
 
@@ -297,7 +298,7 @@
             
             // STEP 1: Move to Review Button (Smart Calculation)
             await delay(1000);
-            moveFingerToTarget('review-btn', 20, 10); // +Offset to look natural
+            moveFingerToTarget('review-btn', 20, 10); 
             
             await delay(800);
             finger.classList.add('click');
@@ -313,9 +314,9 @@
             moveFingerToTarget('sig-pad-container', 0, 0);
             
             await delay(800);
-            finger.classList.add('click'); // Press down to start signing
-            simulateDrawing(); // Scribble animation on canvas
-            await delay(1500); // Signing takes time
+            finger.classList.add('click'); 
+            simulateDrawing(); 
+            await delay(1500); 
             finger.classList.remove('click');
 
             // STEP 3: Click Confirm inside modal
@@ -329,8 +330,8 @@
 
             await delay(800);
             finger.classList.remove('click');
-            finger.classList.remove('active'); // Hide finger
-            modal.classList.remove('active'); // Close modal
+            finger.classList.remove('active'); 
+            modal.classList.remove('active'); 
 
             // STEP 4: Show Final State & Vouchers
             reviewBtn.innerHTML = "✅ Agreement Signed";
