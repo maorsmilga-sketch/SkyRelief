@@ -223,4 +223,211 @@
                             Passenger hereby irrevocably waives any further right to claim cash compensation under EU Regulation 261/2004 or any other applicable law against the airline.
                         </div>
                         <div class="signature-pad" id="sig-pad-container">
-                            <div style="position:absolute; top:5px; left:10px; font-size:10px;
+                            <div style="position:absolute; top:5px; left:10px; font-size:10px; color:#94a3b8;">SIGN HERE:</div>
+                            <canvas id="sig-canvas" class="sig-canvas"></canvas>
+                        </div>
+                        <button id="confirm-sign-btn" style="background:#1e293b; color:white; border:none; padding:14px; width:100%; border-radius:12px; font-weight:700;">Confirm Signature</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel">
+            <div class="panel-title" style="color:var(--text-sec); font-size:12px; margin-bottom:15px; letter-spacing: 1px;">HOTEL SOURCING (Req: 450 Pax)</div>
+            <div id="market-list">
+                <div class="bid-item" id="bid-1">
+                    <img src="hotel-airport.jpg" class="hotel-thumb" alt="Hotel 1">
+                    <div class="bid-info"><div style="font-weight:600">Grand Airport</div><div style="font-size:11px; color:var(--danger);">⚠ 150 Rooms</div></div>
+                    <div class="bid-val" id="p1">€250</div>
+                </div>
+                <div class="bid-item" id="bid-2">
+                    <img src="hotel-city.jpg" class="hotel-thumb" alt="Hotel 2">
+                    <div class="bid-info"><div style="font-weight:600">Metro Hub</div><div style="font-size:11px; color:var(--success);">✔ 500 Rooms</div></div>
+                    <div class="bid-val" id="p2">€250</div>
+                </div>
+                <div class="bid-item" id="bid-3">
+                    <img src="hotel-boutique.jpg" class="hotel-thumb" alt="Hotel 3">
+                    <div class="bid-info"><div style="font-weight:600">Regal Suites</div><div style="font-size:11px; color:var(--danger);">⚠ 80 Rooms</div></div>
+                    <div class="bid-val" id="p3">€250</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-overlay" id="summary-overlay">
+        <div class="summary-card">
+            <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--accent);">Simulation Complete</div>
+            <h2 style="font-size:32px; font-weight:800; margin:10px 0 30px 0;">Executive Summary</h2>
+            
+            <div style="font-size:14px; color:var(--text-sec); margin-bottom:20px; line-height:1.6;">
+                By automating hotel sourcing and offering immediate travel vouchers, SkyRelief prevented mass cash claims under EU261 regulations.
+            </div>
+
+            <div class="chart-container">
+                <div class="bar-group">
+                    <div class="bar-value" style="color:#f87171">$270k</div>
+                    <div class="bar bar-red" id="bar-risk" style="height:0%"></div>
+                    <div class="bar-label">EU261 RISK</div>
+                </div>
+                
+                <div class="bar-group">
+                    <div class="bar-value" style="color:#34d399">$54k</div>
+                    <div class="bar bar-green" id="bar-actual" style="height:0%"></div>
+                    <div class="bar-label">ACTUAL COST</div>
+                </div>
+            </div>
+
+            <div style="margin: 30px 0;">
+                <div style="font-size:16px; letter-spacing:2px; color:var(--text-sec); margin-bottom:5px;">TOTAL SAVINGS</div>
+                <div style="font-family:'Rajdhani'; font-size:80px; font-weight:800; color:var(--success); line-height:1;">
+                    $216,000
+                </div>
+            </div>
+
+            <a href="mailto:office@skyrelief.com" class="contact-btn">
+                Contact SkyRelief Office →
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const delay = ms => new Promise(res => setTimeout(res, ms));
+        window.onload = () => { setTimeout(initScenario, 2000); };
+
+        async function initScenario() {
+            document.getElementById('target-flight').classList.add('cancelled');
+            document.getElementById('target-tag').innerText = "CANCELLED";
+            await runAuction();
+            sendMsg("⚠️ <strong>Flight Alert:</strong> Flight LY-315 cancelled. 450 pax affected.");
+            await delay(1500);
+            sendMsg("✅ <strong>Solution Found:</strong> Metro Hub Hotel (Capacity guaranteed).");
+            await delay(1000);
+            showInitialOffer();
+        }
+
+        async function runAuction() {
+            const h1 = document.getElementById('bid-1');
+            const h2 = document.getElementById('bid-2');
+            const h3 = document.getElementById('bid-3');
+            
+            h1.classList.add('appear'); await delay(600);
+            h2.classList.add('appear'); await delay(600);
+            h3.classList.add('appear'); await delay(800);
+
+            let p1=250, p2=250, p3=250;
+            for(let i=0; i<10; i++) {
+                p1 -= Math.floor(Math.random()*4); p2 -= Math.floor(Math.random()*7); p3 -= Math.floor(Math.random()*3);
+                document.getElementById('p1').innerText = `€${p1}`; document.getElementById('p2').innerText = `€${p2}`; document.getElementById('p3').innerText = `€${p3}`;
+                await delay(150);
+            }
+            h1.classList.add('disabled'); h3.classList.add('disabled'); h2.classList.add('winner');
+        }
+
+        function sendMsg(html) {
+            const div = document.createElement('div'); div.className = 'msg'; div.innerHTML = html;
+            document.getElementById('chat-container').appendChild(div);
+            setTimeout(() => div.classList.add('visible'), 50);
+        }
+
+        async function showInitialOffer() {
+            const offerHTML = `
+            <div class="offer-card-ui visible">
+                <div style="font-size:11px; text-transform:uppercase; opacity:0.9;">Instant Compensation</div>
+                <div class="offer-amount">$600</div>
+                <div style="font-size:12px; margin-bottom:15px;">Travel credit instead of cash claim.</div>
+                <button id="review-btn" style="background:white; color:#4f46e5; border:none; padding:12px; width:100%; border-radius:12px; font-weight:700; font-family:'Outfit';">Tap to Review</button>
+            </div>`;
+            const wrapper = document.createElement('div'); wrapper.innerHTML = offerHTML;
+            document.getElementById('chat-container').appendChild(wrapper.firstElementChild);
+            await runSignatureFlow();
+        }
+
+        // SMART FINGER LOGIC
+        function moveFingerToTarget(targetId, offsetX = 0, offsetY = 0) {
+            const finger = document.getElementById('finger');
+            const target = document.getElementById(targetId);
+            const screenArea = document.getElementById('phone-screen-area');
+            if(!target) return;
+            const targetRect = target.getBoundingClientRect();
+            const screenRect = screenArea.getBoundingClientRect();
+            const relativeTop = (targetRect.top - screenRect.top) + (targetRect.height / 2) + offsetY;
+            const relativeLeft = (targetRect.left - screenRect.left) + (targetRect.width / 2) + offsetX;
+            finger.style.top = `${relativeTop}px`; finger.style.left = `${relativeLeft}px`; finger.classList.add('active');
+        }
+
+        async function runSignatureFlow() {
+            const finger = document.getElementById('finger');
+            const reviewBtn = document.getElementById('review-btn');
+            const modal = document.getElementById('legal-modal');
+            const confirmBtn = document.getElementById('confirm-sign-btn');
+            
+            await delay(1000);
+            moveFingerToTarget('review-btn', 20, 10);
+            await delay(800);
+            finger.classList.add('click');
+            reviewBtn.innerHTML = "Opening Agreement...";
+            await delay(500);
+            finger.classList.remove('click');
+            
+            modal.classList.add('active');
+            await delay(1000);
+            moveFingerToTarget('sig-pad-container', 0, 0);
+            await delay(800);
+            finger.classList.add('click'); simulateDrawing(); await delay(1500); finger.classList.remove('click');
+
+            await delay(500);
+            moveFingerToTarget('confirm-sign-btn', 0, 0);
+            await delay(800);
+            finger.classList.add('click');
+            confirmBtn.innerHTML = "Verifying...";
+            confirmBtn.style.background = "#10b981";
+
+            await delay(800);
+            finger.classList.remove('click'); finger.classList.remove('active'); modal.classList.remove('active'); 
+
+            reviewBtn.innerHTML = "✅ Agreement Signed";
+            reviewBtn.style.background = "#10b981"; reviewBtn.style.color = "white";
+            document.getElementById('final-vouchers').classList.add('visible');
+            
+            animateMoney();
+        }
+
+        function simulateDrawing() {
+            const canvas = document.getElementById('sig-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.beginPath();
+            let pts = [[50,20],[70,40],[90,10],[120,50],[150,30],[180,60]];
+            let i=0;
+            const int = setInterval(() => {
+                if(i>=pts.length-1) clearInterval(int);
+                else { ctx.moveTo(pts[i][0], pts[i][1]); ctx.lineTo(pts[i+1][0], pts[i+1][1]); ctx.stroke(); i++; }
+            }, 150);
+        }
+
+        function animateMoney() {
+            const display = document.getElementById('money-display');
+            document.getElementById('roi-sub').innerText = "100% Cash Risk Diverted";
+            let val = 0; const target = 216500;
+            const interval = setInterval(() => {
+                val += target/50;
+                if(val >= target) { 
+                    val = target; clearInterval(interval);
+                    // TRIGGER SUMMARY MODAL
+                    // CHANGED: Increased delay to 8000 (8 seconds)
+                    setTimeout(showSummary, 8000); 
+                }
+                display.innerText = "$" + Math.floor(val).toLocaleString();
+            }, 30);
+        }
+
+        function showSummary() {
+            document.getElementById('summary-overlay').classList.add('visible');
+            setTimeout(() => {
+                // Animate Chart Bars
+                document.getElementById('bar-risk').style.height = '100%';
+                document.getElementById('bar-actual').style.height = '20%'; // Approx 54k/270k
+            }, 500);
+        }
+    </script>
+</body>
+</html>
