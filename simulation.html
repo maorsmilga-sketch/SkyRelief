@@ -138,7 +138,7 @@
         .bar-red { background: linear-gradient(to top, #ef4444, #f87171); box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
         .bar-green { background: linear-gradient(to top, #10b981, #34d399); box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
         .bar-label { font-size: 11px; margin-top: 10px; color: var(--text-sec); letter-spacing: 0.5px; }
-        /* CHANGED: Increased font size for chart values */
+        /* INCREASED FONT SIZE */
         .bar-value { margin-bottom: 15px; font-weight: 700; font-family: 'Rajdhani'; font-size: 42px; }
 
         .contact-btn {
@@ -292,7 +292,13 @@
 
     <script>
         const delay = ms => new Promise(res => setTimeout(res, ms));
-        window.onload = () => { setTimeout(initScenario, 2000); };
+        
+        window.onload = () => {
+            // PLAY AUDIO IMMEDIATELY ON LOAD
+            new Audio('demo-voice.mp3').play();
+            
+            setTimeout(initScenario, 2000);
+        };
 
         async function initScenario() {
             document.getElementById('target-flight').classList.add('cancelled');
@@ -412,8 +418,7 @@
                 val += target/50;
                 if(val >= target) { 
                     val = target; clearInterval(interval);
-                    // TRIGGER SUMMARY MODAL
-                    // CHANGED: Increased delay to 8000 (8 seconds)
+                    // TRIGGER SUMMARY MODAL - DELAYED BY 8 SECONDS
                     setTimeout(showSummary, 8000); 
                 }
                 display.innerText = "$" + Math.floor(val).toLocaleString();
