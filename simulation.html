@@ -34,6 +34,24 @@
             background-attachment: fixed;
         }
 
+        /* --- START OVERLAY (NEW) --- */
+        #start-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #020617; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .start-btn {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border: none; padding: 20px 50px; border-radius: 50px;
+            color: white; font-size: 24px; font-weight: 800; font-family: 'Rajdhani', sans-serif;
+            letter-spacing: 2px; cursor: pointer;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+        }
+        .start-btn:hover { transform: scale(1.05); box-shadow: 0 0 50px rgba(59, 130, 246, 0.8); }
+
         /* --- HEADER & LAYOUT --- */
         header { display: flex; align-items: center; justify-content: space-between; padding: 0 40px; border-bottom: 1px solid var(--card-border); backdrop-filter: blur(10px); z-index: 100; background: rgba(2, 6, 23, 0.6); }
         .logo { font-weight: 800; font-size: 22px; letter-spacing: -0.5px; background: linear-gradient(90deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -139,7 +157,6 @@
         .bar-green { background: linear-gradient(to top, #10b981, #34d399); box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
         .bar-label { font-size: 11px; margin-top: 10px; color: var(--text-sec); letter-spacing: 0.5px; }
         
-        /* UPDATED: Large Font for Chart Values */
         .bar-value { margin-bottom: 15px; font-weight: 700; font-family: 'Rajdhani'; font-size: 42px; }
 
         .contact-btn {
@@ -156,7 +173,15 @@
 </head>
 <body>
     
-    <audio id="bg-audio" src="demo-voice.mp3" preload="auto" autoplay></audio>
+    <div id="start-overlay">
+        <div style="margin-bottom: 30px; color: white; text-align: center;">
+            <div style="font-size: 20px; opacity: 0.7; margin-bottom: 10px;">WELCOME TO</div>
+            <div style="font-size: 40px; font-weight: 800; letter-spacing: 2px;">SKYRELIEF DEMO</div>
+        </div>
+        <button class="start-btn" onclick="startExperience()">START DEMO</button>
+    </div>
+
+    <audio id="bg-audio" src="demo-voice.mp3" preload="auto"></audio>
 
     <header>
         <div class="logo"><span style="color:var(--primary)">◆</span> SKYRELIEF <span style="font-weight:300; opacity:0.5; font-size: 14px;">GLOBAL OPS</span></div>
@@ -296,17 +321,23 @@
     <script>
         const delay = ms => new Promise(res => setTimeout(res, ms));
         
-        window.onload = () => {
-            // Direct simple play method (Old School)
+        // --- NEW: START FUNCTION TRIGGERED BY USER CLICK ---
+        function startExperience() {
+            // 1. Hide the overlay
+            const overlay = document.getElementById('start-overlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 500);
+
+            // 2. Play Audio (Now trusted because user clicked)
             const audio = document.getElementById('bg-audio');
             if(audio) {
                 audio.volume = 1.0;
-                // Force play
-                audio.play().catch(e => console.log("Browser blocked autoplay:", e));
+                audio.play();
             }
 
-            setTimeout(initScenario, 2000);
-        };
+            // 3. Start Scenario after slight delay
+            setTimeout(initScenario, 1500);
+        }
 
         async function initScenario() {
             document.getElementById('target-flight').classList.add('cancelled');
@@ -426,8 +457,7 @@
                 val += target/50;
                 if(val >= target) { 
                     val = target; clearInterval(interval);
-                    // UPDATED: 8000ms delay as requested
-                    setTimeout(showSummary, 9000); 
+                    setTimeout(showSummary, 8000); 
                 }
                 display.innerText = "$" + Math.floor(val).toLocaleString();
             }, 30);
@@ -436,9 +466,8 @@
         function showSummary() {
             document.getElementById('summary-overlay').classList.add('visible');
             setTimeout(() => {
-                // Animate Chart Bars
                 document.getElementById('bar-risk').style.height = '100%';
-                document.getElementById('bar-actual').style.height = '20%'; // Approx 54k/270k
+                document.getElementById('bar-actual').style.height = '20%';
             }, 500);
         }
     </script>
